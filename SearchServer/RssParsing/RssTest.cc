@@ -9,7 +9,7 @@ using namespace tinyxml2;
 void test0(void)
 {
     XMLDocument doc;    //先创建一个文件变量再加载进文件
-    doc.LoadFile("");
+    doc.LoadFile("coolshell.xml");
     if(doc.ErrorID())   //返回0表示加载成功
     { 
         cout<<"xmlfile load fail"<<endl;
@@ -31,7 +31,7 @@ void test0(void)
 	string content(contentNode->GetText());
 
 	cout<<"title --> "<<title<<endl;
-	cout<<"link  -->"<<link<<endl;
+	cout<<"link  --> "<<link<<endl;
     } 
 }
 
