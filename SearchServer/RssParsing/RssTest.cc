@@ -1,6 +1,8 @@
 #include"tinyxml2.h"
 #include<iostream>
 #include<string>
+#include<boost/regex.hpp>
+
 using std::cout;
 using std::endl;
 using std::string;
@@ -32,6 +34,25 @@ void test0(void)
 
 	cout<<"title --> "<<title<<endl;
 	cout<<"link  --> "<<link<<endl;
+	//cout << "description: --> " << description << endl;
+	//cout << "content: --> " << content << endl;
+    
+
+
+        /***使用正则表达式过滤掉content里的html标记
+	******************************************/
+	//传入正则表达式字符串 创建一个正则表达式对象
+        //正则表达式需要拼凑使之能够匹配所有的html的标签，这里直接google一个
+	boost::regex re("</?[^>]+>");  
+        
+	//结果发现 description里也有Html标注 去掉之
+        string result_ = boost::regex_replace(description, re, string(""));
+	cout << "description --> " << result_ << endl;
+
+	//例子中boost::regex_replace()的这种传参用法的返回值是字符串正是我所需的
+	//参数1.原字符串 2.正则表达式对象 3.替换内容(这里是替换成空字符串)
+	string result = boost::regex_replace(content,re,string(""));
+	cout << "content --> " << result << endl;
     } 
 }
 
@@ -40,4 +61,6 @@ int main()
     test0();
     return 0;
 }
-
+//g++ RssTest.cc tinyxml.cc 编译
+// ./a.out  运行
+// 使用正则表达式后编译时需要加上boost::regex库的链接，即添加 -lboost_regex
