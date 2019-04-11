@@ -18,8 +18,9 @@ void test0(void)
     }
     XMLElement * itemNode = doc.FirstChildElement("rss")    //通过递归遍历找到第一篇文章 用指针itemNode指向
 	   	        	->FirstChildElement("channel")
-		       		->FirstChildElement("item");	
-    if(itemNode)    
+				->FirstChildElement("item");	
+   // if(itemNode)    //提取一个item的内容时
+   while(itemNode)
     {   //如果指向的这篇文章存在 则去拿下面的兄弟节点 
         XMLElement * titleNode = itemNode->FirstChildElement("title");
 	XMLElement * linkNode = itemNode->FirstChildElement("link");
@@ -31,7 +32,7 @@ void test0(void)
 	string link(linkNode->GetText());
 	string description(descriptionNode->GetText());
 	string content(contentNode->GetText());
-
+        
 	cout<<"title --> "<<title<<endl;
 	cout<<"link  --> "<<link<<endl;
 	//cout << "description: --> " << description << endl;
@@ -53,6 +54,10 @@ void test0(void)
 	//参数1.原字符串 2.正则表达式对象 3.替换内容(这里是替换成空字符串)
 	string result = boost::regex_replace(content,re,string(""));
 	cout << "content --> " << result << endl;
+
+
+        itemNode = itemNode -> NextSiblingElement("item");    //itemNode->NestSiblingElement(“item”) 得到itemNode节点标签为item的兄弟节点
+
     } 
 }
 
