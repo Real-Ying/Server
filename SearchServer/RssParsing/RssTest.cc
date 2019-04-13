@@ -8,6 +8,15 @@ using std::endl;
 using std::string;
 using namespace tinyxml2;
 
+/*
+struct RssItem
+{
+    string titl;
+    string link;
+    string description;
+    string content;
+};
+*/
 void test0(void)
 {
     XMLDocument doc;    //先创建一个文件变量再加载进文件
@@ -19,8 +28,8 @@ void test0(void)
     XMLElement * itemNode = doc.FirstChildElement("rss")    //通过递归遍历找到第一篇文章 用指针itemNode指向
 	   	        	->FirstChildElement("channel")
 				->FirstChildElement("item");	
-   // if(itemNode)    //提取一个item的内容时
-   while(itemNode)
+    // if(itemNode)    //提取一个item的内容时
+    while(itemNode)    //提取一个文件的所有item
     {   //如果指向的这篇文章存在 则去拿下面的兄弟节点 
         XMLElement * titleNode = itemNode->FirstChildElement("title");
 	XMLElement * linkNode = itemNode->FirstChildElement("link");
@@ -30,14 +39,14 @@ void test0(void)
 	//拿到兄弟节点指针后就去获取里面的字符串
         string title(titleNode->GetText());
 	string link(linkNode->GetText());
-	string description(descriptionNode->GetText());
-	string content(contentNode->GetText());
+	string description_(descriptionNode->GetText());
+	string content_(contentNode->GetText());
         
 	cout<<"title --> "<<title<<endl;
 	cout<<"link  --> "<<link<<endl;
 	//cout << "description: --> " << description << endl;
 	//cout << "content: --> " << content << endl;
-    
+       
 
 
         /***使用正则表达式过滤掉content里的html标记
@@ -47,18 +56,19 @@ void test0(void)
 	boost::regex re("</?[^>]+>");  
         
 	//结果发现 description里也有Html标注 去掉之
-        string result_ = boost::regex_replace(description, re, string(""));
-	cout << "description --> " << result_ << endl;
+        string description = boost::regex_replace(description_, re, string(""));
+        cout << "description --> " << description << endl;
 
 	//例子中boost::regex_replace()的这种传参用法的返回值是字符串正是我所需的
 	//参数1.原字符串 2.正则表达式对象 3.替换内容(这里是替换成空字符串)
-	string result = boost::regex_replace(content,re,string(""));
-	cout << "content --> " << result << endl;
+	string content = boost::regex_replace(content_,re,string(""));
+	cout << "content --> " << content << endl;
 
 
         itemNode = itemNode -> NextSiblingElement("item");    //itemNode->NestSiblingElement(“item”) 得到itemNode节点标签为item的兄弟节点
 
     } 
+    
 }
 
 int main()
