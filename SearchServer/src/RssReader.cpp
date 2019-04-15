@@ -103,10 +103,12 @@ void RssReader::parseRss(XMLDocument & doc)
 		boost::regex fmt(szReg);    //定义一个正则表达式变量
 		string content = boost::regex_replace(string(iContent), fmt, string(""));    //用空格替换掉匹配到的html标注
 		
+		//打印该item的子结点
 		rssItemPtr->_title = itemTitle ? itemTitle : string("");
 		rssItemPtr->_link = itemLink ? itemLink : string("");
 		rssItemPtr->_content = content;
-
+                
+		//push进vector保存
 		_items.push_back(rssItemPtr);
 	}
 }
