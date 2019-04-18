@@ -51,7 +51,7 @@ void RssReader::loadFeedFile(const string & filename)
 	}
 }
 
-
+//将解析vector进行格式化拼接
 void RssReader::makePages(vector<string> & pages)
 {
 	cout << "pages's size = " << _items.size() << endl;
@@ -66,7 +66,7 @@ void RssReader::makePages(vector<string> & pages)
 			<< "/<doc>\n";
 		
 		string page = oss.str();
-		pages.push_back(page);
+		pages.push_back(page);    //将格式化拼接后的item push进vector(page)
 	}
 }
 
@@ -108,7 +108,7 @@ void RssReader::parseRss(XMLDocument & doc)
 		rssItemPtr->_link = itemLink ? itemLink : string("");
 		rssItemPtr->_content = content;
                 
-		//push进vector保存
+		//将完成的Rssitem push进vector保存
 		_items.push_back(rssItemPtr);
 	}
 }

@@ -20,6 +20,7 @@ struct RssItem
 	string _content;
 };
 
+//debug所需信息
 struct RssData
 {
 	string _version;
@@ -35,11 +36,14 @@ class RssReader
 public:
 	RssReader(vector<string> & files);
 	~RssReader();
-
+        
+        //加载解析一个及数个文件	
 	void loadFeedFiles();
 	void loadFeedFile(const string & filename);
 
 	void initWithRssString(const string & rss);
+
+	//对解析后的vector进行格式拼接处理
 	void makePages(vector<string> & pages);
 private:
 	void parseRss(XMLDocument & doc);   //rss解析函数只供类内部函数使用，设为私有
