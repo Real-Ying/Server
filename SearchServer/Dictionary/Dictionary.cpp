@@ -37,7 +37,7 @@ void Dictionary::read(const string& filename) {
 		istringstream iss(line);  //把这行内容拿给字符串IO处理
 		string preword;  //未经处理的单词
 		while(iss >> preword) {
-			
+		    string word = preprocessWord(preword);  //调单词预处理函数对未处理单词进行处理	
 		}
 	}
 }
