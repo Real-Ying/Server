@@ -22,7 +22,8 @@ class Dictionary {
   void store(const string& filename);
 
  private:
-  vector<Record> _dict;  
+  vector<Record> _dict;
+  string preprocessWord(const string& );  
 		 
 };
 
@@ -33,10 +34,10 @@ void Dictionary::read(const string& filename) {
 		return;
 	}	
 	string line;
-	while(getline(ifs,line)) {  //当获得的行内容不为空时
-		istringstream iss(line);  //把这行内容拿给字符串IO处理
-		string preword;  //未经处理的单词
-		while(iss >> preword) {
+	while(getline(ifs,line)) {  //逐行读取文件内容存入内存空间变量line
+		istringstream iss(line);  //以line创建字符串输入流
+		string preword;  //未经处理单词
+		while(iss >> preword) {  //字符串输入流中读取未经处理的单词，>> 不可读入不可见字符起到过滤空格作用
 		    string word = preprocessWord(preword);  //调单词预处理函数对未处理单词进行处理	
 		}
 	}
