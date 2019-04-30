@@ -43,8 +43,17 @@ void Dictionary::read(const string& filename) {
   }
 }
 
-string Dictionary::preprocessWord(string& word) {
-
+string Dictionary::preprocessWord(string& word) {  //对单词进行预处理
+  for(size_t idx = 0; idx != word.size(); ++idx) { //size_t是无符号的int
+    if (isdigit(word[idx])) {  //单词中有数字字母存在则该位返回空字符串替代
+      return string();
+    } 
+    else if (isupper(word[idx]))  //字母大写转小写  
+    {
+      word[idx] = tolower(word[idx]);
+    }
+  }
+  return word;  //返回处理后的单词
 }
 
 
