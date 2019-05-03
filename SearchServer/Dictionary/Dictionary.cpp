@@ -24,7 +24,8 @@ class Dictionary {
 
  private:
   vector<Record> _dict;
-  string preprocessWord(const string& );  
+  string preprocessWord(const string& word); 
+  void statistic(const string& word); 
 		 
 };
 
@@ -43,6 +44,7 @@ void Dictionary::read(const string& filename) {
       if (word != string())  //处理后的单词不是因为包含数字返回的空字符串则进行统计
           statistic(word);
   }
+  std::sort(_dict.begin(), _dict.end());  //完成后对索引vextor进行快排
 }
 
 string Dictionary::preprocessWord(string& word) {  //对单词进行预处理
@@ -61,13 +63,13 @@ string Dictionary::preprocessWord(string& word) {  //对单词进行预处理
 void Dictionary::statistic(const string& word)
 {
   for(size_t idx = 0; idx != _dict.size(); ++idx) {
-    if (word == _dict[idx].word) { //如果能够查找到
+    if (word == _dict[idx].word) {  //如果在_dict中能找到这个word(统计过)，则_dict中该词频率加1
         ++_dict[idx].freq;
         break;
     }
   }
 				
-    if (idx == _dict.size()) {//没有找到
+    if (idx == _dict.size()) {      //没有找到(从未统计过),则建立一个新的Record对象并推进_dict
         Record record;
 	record.word = word;
 	record.freq = 1;
