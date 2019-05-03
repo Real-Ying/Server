@@ -22,8 +22,8 @@ struct Record {
 
 class Dictionary {
  public:
-  Dictionary()
-      : _dict.reserve(10000); {  //_dict的预留容量
+  Dictionary() {
+    _dict.reserve(10000);  //设置_dict的预留容量
  }
   
   void read(const string& filename);
@@ -78,8 +78,7 @@ string Dictionary::preprocessWord(string& word) {  //对单词进行预处理
   return word;  //返回处理后的单词
 }
 
-void Dictionary::statistic(const string& word)
-{
+void Dictionary::statistic(const string& word) {
   for(size_t idx = 0; idx != _dict.size(); ++idx) {
     if (word == _dict[idx].word) {  //如果在_dict中能找到这个word(统计过)，则_dict中该词频率加1
         ++_dict[idx].freq;
@@ -87,7 +86,7 @@ void Dictionary::statistic(const string& word)
     }
   }
 				
-    if (idx == _dict.size()) {      //没有找到(从未统计过),则建立一个新的Record对象并推进_dict
+    if (idx == _dict.size()){      //没有找到(从未统计过),则建立一个新的Record对象并推进_dict
         Record record;
 	record.word = word;
 	record.freq = 1;
@@ -95,7 +94,7 @@ void Dictionary::statistic(const string& word)
     }
 }
 
-void main(void) {
+void main() {
   Dictionary dictionary;
   dictionary.read("The_Holy_Bible.txt");
   dictionary.store("dict.txt");
