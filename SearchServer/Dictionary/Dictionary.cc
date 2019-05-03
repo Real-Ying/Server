@@ -13,12 +13,19 @@ using std::ofstream;
 using std::istringstream;
 
 struct Record {
-	string word;
-	int freq;
+  string word;
+  int freq;
+  bool operator<(const Record& rhs) const {
+    return freq > rhs.freq;
+  }	
 };
 
 class Dictionary {
  public:
+  Dictionary()
+      : _dict.reserve(10000); {  //_dict的预留容量
+ }
+  
   void read(const string& filename);
   void store(const string& filename);
 
@@ -32,7 +39,7 @@ class Dictionary {
 void Dictionary::read(const string& filename) {
   ifstream ifs(filename);
   if (!ifs) {
-    cout << file open error <<endl;
+    cout << "file open error" <<endl;
     return;
   }	
   string line;
@@ -44,7 +51,7 @@ void Dictionary::read(const string& filename) {
       if (word != string())  //处理后的单词不是因为包含数字返回的空字符串则进行统计
           statistic(word);
   }
-  std::sort(_dict.begin(), _dict.end());  //完成后对索引vextor进行快排
+  std::sort(_dict.begin(), _dict.end());  //完成后根据频率大小对索引vextor进行快排
 }
 
 void Dictionary::store(const string& filename) {  //将完成的逆向索引保存到外存文件
@@ -88,7 +95,11 @@ void Dictionary::statistic(const string& word)
     }
 }
 
-
+void main(void) {
+  Dictionary dictionary;
+  dictionary.read("The_Holy_Bible.txt");
+  dictionary.store("dict.txt");
+}
 
 
 
