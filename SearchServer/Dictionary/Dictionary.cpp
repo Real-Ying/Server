@@ -47,6 +47,17 @@ void Dictionary::read(const string& filename) {
   std::sort(_dict.begin(), _dict.end());  //完成后对索引vextor进行快排
 }
 
+void Dictionary::store(const string& filename) {  //将完成的逆向索引保存到外存文件
+  ofstream ofs(filename);  //创建一个文件输出流
+  if (!ofs) {
+      cout << " >> ofstream open error!" << endl;
+      return;
+  }
+  for(auto& record : _dict) {  //将_dict里的内容以此种格式输入到文件中
+      ofs << record.word << "\t" << record.freq << "\n";
+  }
+}
+
 string Dictionary::preprocessWord(string& word) {  //对单词进行预处理
   for(size_t idx = 0; idx != word.size(); ++idx) { //size_t是无符号的int
     if (isdigit(word[idx])) {  //单词中有数字字母存在则该位返回空字符串替代
