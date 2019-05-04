@@ -30,10 +30,10 @@ class Dictionary {
   void store(const string& filename);
 
  private:
-  vector<Record> _dict;
-  string preprocessWord(const string& word); 
+  string preprocessWord(string& word); 
   void statistic(const string& word); 
-		 
+ private: 
+  vector<Record> _dict;
 };
 
 void Dictionary::read(const string& filename) {
@@ -50,11 +50,12 @@ void Dictionary::read(const string& filename) {
       string word = preprocessWord(preword);  //调单词预处理函数对未处理单词进行处理	
       if (word != string())  //处理后的单词不是因为包含数字返回的空字符串则进行统计
           statistic(word);
+    }
   }
   std::sort(_dict.begin(), _dict.end());  //完成后根据频率大小对索引vextor进行快排
 }
 
-void Dictionary::store(const string& filename) {  //将完成的逆向索引保存到外存文件
+void Dictionary::store(const string& word) {
   ofstream ofs(filename);  //创建一个文件输出流
   if (!ofs) {
       cout << " >> ofstream open error!" << endl;
@@ -78,8 +79,10 @@ string Dictionary::preprocessWord(string& word) {  //对单词进行预处理
   return word;  //返回处理后的单词
 }
 
+
 void Dictionary::statistic(const string& word) {
-  for(size_t idx = 0; idx != _dict.size(); ++idx) {
+  size_t idx;
+  for(idx = 0; idx != _dict.size(); ++idx) {
     if (word == _dict[idx].word) {  //如果在_dict中能找到这个word(统计过)，则_dict中该词频率加1
         ++_dict[idx].freq;
         break;
@@ -94,10 +97,11 @@ void Dictionary::statistic(const string& word) {
     }
 }
 
-void main() {
+int main() {
   Dictionary dictionary;
   dictionary.read("The_Holy_Bible.txt");
   dictionary.store("dict.txt");
+  return 0;
 }
 
 
