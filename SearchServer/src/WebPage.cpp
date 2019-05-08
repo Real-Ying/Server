@@ -30,87 +30,83 @@ struct WordFreqCompare
 };
 
 
-WebPage::WebPage(string & doc, Configuration & config, WordSegmentation & jieba)
-: _doc(doc)
-{
-	//cout << "WebPage()" << endl;
-	_topWords.reserve(10);
-	processDoc(doc, config, jieba);
+
+WebPage::WebPage(string & doc, Configuration & config, WordSegmentation & jieba)  //构造函数 (传入格式化后的文档、配置、分词类对象)
+    : _doc(doc) {                        //输入的这篇文档由PageLib.cc输出
+  //cout << "WebPage()" << endl;
+  _topWords.reserve(10);                 //存储一篇文章词频最高的前20个词的向量预留空间(改20？)
+  processDoc(doc, config, jieba);        //对已格式化的文章进行处理
+
+}
+
+void WebPage::processDoc(const string & doc, Configuration & config, WordSegmentation & jieba) {       
+  //用变量表示文档中每篇文章每项的开头和结尾的字符串标志
+  string docIdHead = "<docid>";
+  string docIdTail = "</docid>";
+  string docUrlHead = "<link>";
+  string docUrlTail = "</link>";
+  string docTitleHead = "<title>";
+  string docTitleTail = "</title>";
+  string docContentHead = "<content>";
+  string docContentTail = "</content>";
+
+  //提取文档的docid
+  int bpos = doc.find(docIdHead);                             //string::find(string) 查找返回与给定字符串序列相等的第一子串位置(首字符pos) 
+  int epos = doc.find(docIdTail);
+  string docId = doc.substr(bpos + docIdHead.size(),          //string::substr(pos, pos+count) 返回此区间子串
+			    epos - bpos - docIdHead.size());  //由于使用的相对位置，第一个位置参数看作0，第二个参数是比第一个参数位数增加的数量
+  _docId = atoi(docId.c_str());                               //atoi(char) 将char型数字串转化为整型
+
+  //title
+  bpos = doc.find(docTitleHead);
+  epos = doc.find(docTitleTail);
+  _docTitle = doc.substr(bpos + docTitleHead.size(), 
+			 epos - bpos - docTitleHead.size());
+  
+  //content
+  //cout << "================================================" << endl << _docTitle << endl;
+  bpos = doc.find(docContentHead);
+  epos = doc.find(docContentTail);
+  _docContent = doc.substr(bpos + docContentHead.size(),
+			   epos - bpos - docContentHead.size());
+
+  //cout << "================================================" << endl << _docContent << endl;
+
+
+  //
+  vector<string> wordsVec = jieba(_docContent.c_str());           //对content进行分词存于vector<string> wordVec(针对中文)
+  set<string> & stopWordList = config.getStopWordList();          //获取配置中的停顿词
+  calcTopK(wordsVec, TOPK_NUMBER, stopWordList);                  //求取文章的topk词集
 
 }
 
 
-void WebPage::processDoc(const string & doc, Configuration & config, WordSegmentation & jieba)
-{
-	string docIdHead = "<docid>";
-	string docIdTail = "</docid>";
-	string docUrlHead = "<link>";
-	string docUrlTail = "</link>";
-	string docTitleHead = "<title>";
-	string docTitleTail = "</title>";
-	string docContentHead = "<content>";
-	string docContentTail = "</content>";
-
-	//提取文档的docid
-	int bpos = doc.find(docIdHead);
-	int epos = doc.find(docIdTail);
-	string docId = doc.substr(bpos + docIdHead.size(), 
-					epos - bpos - docIdHead.size());
-	_docId = atoi(docId.c_str());
-
-	//title
-	bpos = doc.find(docTitleHead);
-	epos = doc.find(docTitleTail);
-	_docTitle = doc.substr(bpos + docTitleHead.size(), 
-					epos - bpos - docTitleHead.size());
-
-	//cout << "========" << endl << _docTitle << endl;
-	//content
-	bpos = doc.find(docContentHead);
-	epos = doc.find(docContentTail);
-	_docContent = doc.substr(bpos + docContentHead.size(),
-					epos - bpos - docContentHead.size());
-
-	//cout << "========" << endl << _docContent << endl;
-
-
-	//分词
-	vector<string> wordsVec = jieba(_docContent.c_str());
-	set<string> & stopWordList = config.getStopWordList();
-	calcTopK(wordsVec, TOPK_NUMBER, stopWordList);
-
-}
-
-
-void WebPage::calcTopK(vector<string> & wordsVec, int k, set<string> & stopWordList)
-{
-	for(auto iter = wordsVec.begin(); iter != wordsVec.end(); ++iter)
-	{
-		auto sit = stopWordList.find(*iter);
-		if(sit == stopWordList.end())
-		{
-			++_wordsMap[*iter];
-		}
-	}
+//calcTopK()
+void WebPage::calcTopK(vector<string> & wordsVec, int k, set<string> & stopWordList) {
+  for (auto iter = wordsVec.begin(); iter != wordsVec.end(); ++iter) {
+    auto sit = stopWordList.find(*iter);
+    if (sit == stopWordList.end()) {
+        ++_wordsMap[*iter];    //Map<string, int>保存文档中每个词及其词频
+    }
+  }
 
 	
-	priority_queue<pair<string, int>, vector<pair<string, int> >, WordFreqCompare>
-		wordFreqQue(_wordsMap.begin(), _wordsMap.end());
+  priority_queue<pair<string, int>, vector<pair<string, int> >, WordFreqCompare>
+  wordFreqQue(_wordsMap.begin(), _wordsMap.end());
 
-	while(!wordFreqQue.empty())
-	{
-		string top = wordFreqQue.top().first;
-		wordFreqQue.pop();
-		if(top.size() == 1 && (static_cast<unsigned int>(top[0]) == 10 ||
-			static_cast<unsigned int>(top[0]) == 13))
-		{	continue;	}
+  while(!wordFreqQue.empty()) {
+    string top = wordFreqQue.top().first;
+    wordFreqQue.pop();
+    if (top.size() == 1 && (static_cast<unsigned int>(top[0]) == 10
+		        || static_cast<unsigned int>(top[0]) == 13)) {	
+        continue;
+    }
 
-		_topWords.push_back(top);
-		if(_topWords.size() >= static_cast<size_t>(k))
-		{
-			break;
-		}
-	}
+    _topWords.push_back(top);
+    if (_topWords.size() >= static_cast<size_t>(k)) {
+	break;
+    }
+}
 
 
 #if 0
