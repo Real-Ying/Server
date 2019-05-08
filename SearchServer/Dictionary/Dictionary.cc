@@ -15,8 +15,8 @@ using std::istringstream;
 struct Record {
   string word;
   int freq;
-  bool operator<(const Record& rhs) const {
-    return freq > rhs.freq;
+  bool operator<(const Record& rhs) const {  //下面对Vector中的Record排序涉及比较问题（error信息中具体要求<重载)
+    return freq > rhs.freq;                  //这里<重载为根据频率大小比较(也可以首字母大小或其他)
   }	
 };
 
