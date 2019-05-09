@@ -16,6 +16,7 @@ using std::make_pair;
 namespace wd
 {
 
+//词语及其词频vector<pair<string, int>>的排序所需的重载，根据pair<>的第二个元素降序
 struct WordFreqCompare
 {
 	bool operator()(const pair<string, int> & left, const pair<string, int> & right)
@@ -74,7 +75,7 @@ void WebPage::processDoc(const string & doc, Configuration & config, WordSegment
 
 
   //
-  vector<string> wordsVec = jieba(_docContent.c_str());           //对content进行分词存于vector<string> wordVec(针对中文)
+  vector<string> wordsVec = jieba(_docContent.c_str());           //对content进行分词存于vector<string> wordVec(针对中文) <"word1","word2", ...,"wordn">
   set<string> & stopWordList = config.getStopWordList();          //获取配置中的停顿词
   calcTopK(wordsVec, TOPK_NUMBER, stopWordList);                  //求取文章的topk词集
 
@@ -83,21 +84,24 @@ void WebPage::processDoc(const string & doc, Configuration & config, WordSegment
 
 //calcTopK()
 void WebPage::calcTopK(vector<string> & wordsVec, int k, set<string> & stopWordList) {
-  for (auto iter = wordsVec.begin(); iter != wordsVec.end(); ++iter) {
-    auto sit = stopWordList.find(*iter);
-    if (sit == stopWordList.end()) {
+  //统计非停顿词的词频
+  for (auto iter = wordsVec.begin(); iter != wordsVec.end(); ++iter) {  
+    auto sit = stopWordList.find(*iter);      //set::find()无结果则返回set::end()
+    if (sit == stopWordList.end()) {          //如果不是停顿词则该词词频++ 
         ++_wordsMap[*iter];    //Map<string, int>保存文档中每个词及其词频
     }
   }
 
-	
-  priority_queue<pair<string, int>, vector<pair<string, int> >, WordFreqCompare>
-  wordFreqQue(_wordsMap.begin(), _wordsMap.end());
-
+  //对词及词频的map进行排序 //priority_queue<数据类型, 数组类容器, 比较方式的函数> 排列对象;
+  //类型注意pair<,>，容器默认Vector,比较方式WordFreqCompare默认operate<重载
+  priority_queue<pair<string, int>, vector<pair<string, int> >, WordFreqCompare> wordFreqQue(_wordsMap.begin(), _wordsMap.end());
+  
+  //获取topk词集
   while(!wordFreqQue.empty()) {
     string top = wordFreqQue.top().first;
     wordFreqQue.pop();
-    if (top.size() == 1 && (static_cast<unsigned int>(top[0]) == 10
+    //取词时过滤掉单个字母词、回车/r、换行/n
+    if (top.size() == 1 && (static_cast<unsigned int>(top[0]) == 10  //这里static_cast<>将元素由string型强转数字整型size_t
 		        || static_cast<unsigned int>(top[0]) == 13)) {	
         continue;
     }
@@ -124,32 +128,31 @@ void WebPage::calcTopK(vector<string> & wordsVec, int k, set<string> & stopWordL
 }
 
 // 判断两篇文档是否相同
-bool operator == (const WebPage & lhs, const WebPage & rhs) 
-{
-	int commNum = 0;
-	auto lIter = lhs._topWords.begin();
-	for(;lIter != lhs._topWords.end(); ++lIter)
-	{
-		commNum += std::count(rhs._topWords.begin(), rhs._topWords.end(), *lIter);
-	}
+bool operator == (const WebPage & lhs, const WebPage & rhs) {
+  int commNum = 0;
+  auto lIter = lhs._topWords.begin();
+  for (;lIter != lhs._topWords.end(); ++lIter) {  //top词集中相同个数
+    commNum += std::count(rhs._topWords.begin(), rhs._topWords.end(), *lIter);
+  }
 	
-	int lhsNum = lhs._topWords.size();
-	int rhsNum = rhs._topWords.size();
-	int totalNum = lhsNum < rhsNum ? lhsNum : rhsNum;
+  int lhsNum = lhs._topWords.size();  //top词集数总量取两者更小
+  int rhsNum = rhs._topWords.size();
+  int totalNum = lhsNum < rhsNum ? lhsNum : rhsNum;
 
-	if( static_cast<double>(commNum) / totalNum > 0.75 )
-	{	return true;	}
-	else 
-	{	return false;	}
+  if ( static_cast<double>(commNum) / totalNum > 0.75 ) {  //阈值0.75
+      return true;
+  }
+  else {
+      return false;
+  }
 }
 
-//对文档按照docId进行排序
-bool operator < (const WebPage & lhs, const WebPage & rhs)
-{
-	if(lhs._docId < rhs._docId)
-		return true;
-	else 
-		return false;
+//对文档按照docId进行排序(外部功能)
+bool operator < (const WebPage & lhs, const WebPage & rhs) {
+  if (lhs._docId < rhs._docId)
+      return true;
+  else 
+      return false;
 }
 
 }// end of namespace wd
