@@ -37,7 +37,7 @@ class PageLibPreprocessor {
 
   void buildInvertIndexTable();               //执行创建倒排索引
 
-  void storeOnDisk();
+  void storeOnDisk();                         //正排索引(格式化网页库)、位置偏移库、倒排索引库 写回磁盘上
 
  private:
   Configuration &                                  _conf;              //配置文件类对象的引用
