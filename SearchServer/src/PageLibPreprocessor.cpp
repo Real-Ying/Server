@@ -36,7 +36,7 @@ void PageLibPreprocessor::readInfoFromFile() {
   string pageLibPath = configMap[RIPEPAGELIB_KEY];
   string offsetLibPath = configMap[OFFSETLIB_KEY];
   
-  //两个库流入程序
+  //为两个库创建文件输入流(缓存区)
   ifstream pageIfs(pageLibPath.c_str());
   ifstream offsetIfs(offsetLibPath.c_str());
   if ((!pageIfs.good()) || (!offsetIfs.good())) {
@@ -54,7 +54,7 @@ void PageLibPreprocessor::readInfoFromFile() {
     
     //根据偏移量    
     string doc;
-    doc.resize(docLen, ' ');  //string::resize()调整字符串大小
+    doc.resize(docLen, ' ');  //string::resize()调整字符串大小，预留该文章大小
     pageIfs.seekg(docOffset, pageIfs.beg);  //
     pageIfs.read(&*doc.begin(), docLen);
    
