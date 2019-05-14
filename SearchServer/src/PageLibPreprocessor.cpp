@@ -43,10 +43,9 @@ void PageLibPreprocessor::readInfoFromFile() {
     cout << "page or offset lib open error" << endl;
   }
 
-  //读网页偏移库项目 
+  //逐行读网页偏移库各个项目 
   string line;
   int docId, docOffset, docLen;
-
   while (getline(offsetIfs, line)) {
     //开辟字符串流缓存，偏移库内容行逐一放入内存字符变量
     stringstream ss(line);
