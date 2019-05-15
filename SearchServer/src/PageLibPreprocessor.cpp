@@ -47,21 +47,22 @@ void PageLibPreprocessor::readInfoFromFile() {
   string line;
   int docId, docOffset, docLen;
   while (getline(offsetIfs, line)) {
-    //开辟字符串流缓存，偏移库内容行逐一放入内存字符变量
+    //开辟字符串流缓存保存网页偏移库每行，将每行各项逐一放入内存字符变量
     stringstream ss(line);
     ss >> docId >> docOffset >> docLen;
     
     //根据偏移量    
     string doc;
-    doc.resize(docLen, ' ');  //string::resize()调整字符串大小，预留该文章大小
-    pageIfs.seekg(docOffset, pageIfs.beg);  //
-    pageIfs.read(&*doc.begin(), docLen);
+    doc.resize(docLen, ' ');  //string::resize()调整字符串大小，预留该文章大小空间
+    pageIfs.seekg(docOffset, pageIfs.beg);  //seek(off, dir) off相对偏移量，dir偏移的起始位置，这里是
+    pageIfs.read(&*doc.begin(), docLen);    //read(char *s, len) *s是doc字符数组首地址，&每次read后改变位置
    
-    WebPage webPage(doc, _conf, _jieba);  //对  
-    _pageLib.push_back(webPage);
+    WebPage webPage(doc, _conf, _jieba); //传入此篇文章内容(及配置和分词类对象)构造一个WebPage对象,得到这篇文章top词集
+    _pageLib.push_back(webPage);      //推入网页库容器(包含webpage里的词频统计map和top词集的，非PageLib类处理的网络库)
 
-    _offsetLib.insert(std::make_pair(docId, std::make_pair(docOffset, docLen)));
+    _offsetLib.insert(std::make_pair(docId, std::make_pair(docOffset, docLen)));  //以此种容器形式保存此篇文章正向索引
   }
+
 #if 0
   for (auto mit : _offsetLib) {
     cout << mit.first << "\t" << mit.second.first << "\t" << mit.second.second << endl;
