@@ -70,6 +70,7 @@ void PageLibPreprocessor::readInfoFromFile() {
 #endif
 }
 
+
 void PageLibPreprocessor::cutRedundantPages() {
   for (size_t i = 0; i != _pageLib.size() - 1; ++i) {  //从_PageLib向量第一个开始查找重复文章
     for(size_t j = i + 1; j != _pageLib.size(); ++j) {
@@ -83,56 +84,47 @@ void PageLibPreprocessor::cutRedundantPages() {
   }
 }
 
-void PageLibPreprocessor::buildInvertIndexTable()
-{
-	for(auto page : _pageLib)
-	{
-		map<string, int> & wordsMap = page.getWordsMap();
-		for(auto wordFreq : wordsMap)
-		{
-			_invertIndexTable[wordFreq.first].push_back(std::make_pair(
-					page.getDocId(), wordFreq.second));
-		}
-	}
+void PageLibPreprocessor::buildInvertIndexTable() {
+  for (auto page : _pageLib) {
+    map<string, int>& wordsMap = page.getWordsMap();
+    for (auto wordFreq : wordsMap) {
+      _invertIndexTable[wordFreq.first].push_back(std::make_pair(page.getDocId(), wordFreq.second));
+    }
+  }
 	
-	//计算每篇文档中的词的权重,并归一化
-	map<int, double> weightSum;// 保存每一篇文档中所有词的权重平方和. int 代表docid
+  //计算每篇文档中的词的权重,并归一化
+  map<int, double> weightSum;// 保存每一篇文档中所有词的权重平方和. int 代表docid
 
-	int totalPageNum = _pageLib.size();
-	for(auto & item : _invertIndexTable)
-	{	
-		int df = item.second.size();
-		//求关键词item.first的逆文档频率
-		double idf = log(static_cast<double>(totalPageNum)/ df + 0.05) / log(2);
+  int totalPageNum = _pageLib.size();
+  for (auto & item : _invertIndexTable) {	
+    int df = item.second.size();
+    //求关键词item.first的逆文档频率
+    double idf = log(static_cast<double>(totalPageNum)/ df + 0.05) / log(2);
 		
-		for(auto & sitem : item.second)
-		{
-			double weight = sitem.second * idf;
+    for (auto & sitem : item.second) {
+      double weight = sitem.second * idf;
 
-			weightSum[sitem.first] += pow(weight, 2);
-			sitem.second = weight;
-		}
-	}
+      weightSum[sitem.first] += pow(weight, 2);
+      sitem.second = weight;
+    }
+  }
 
-	for(auto & item : _invertIndexTable)
-	{	//归一化处理
-		for(auto & sitem : item.second)
-		{
-			sitem.second = sitem.second / sqrt(weightSum[sitem.first]);
-		}
-	}
+  for (auto & item : _invertIndexTable) {	
+  //归一化处理
+    for (auto & sitem : item.second) {
+      sitem.second = sitem.second / sqrt(weightSum[sitem.first]);
+    }
+  }
 
 
 #if 0 // for debug
-	for(auto item : _invertIndexTable)
-	{
-		cout << item.first << "\t";
-		for(auto sitem : item.second)
-		{
-			cout << sitem.first << "\t" << sitem.second <<  "\t";
-		}
-		cout << endl;
-	}
+  for (auto item : _invertIndexTable) {
+    cout << item.first << "\t";
+    for (auto sitem : item.second) {
+      cout << sitem.first << "\t" << sitem.second <<  "\t";
+    }
+    cout << endl;
+  }
 #endif
 }
 
