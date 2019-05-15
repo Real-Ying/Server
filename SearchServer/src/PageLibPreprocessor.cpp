@@ -70,20 +70,17 @@ void PageLibPreprocessor::readInfoFromFile() {
 #endif
 }
 
-void PageLibPreprocessor::cutRedundantPages()
-{
-	for(size_t i = 0; i != _pageLib.size() - 1; ++i)
-	{
-		for(size_t j = i + 1; j != _pageLib.size(); ++j)
-		{
-			if(_pageLib[i] == _pageLib[j])
-			{
-				_pageLib[j] = _pageLib[_pageLib.size() - 1];
-				_pageLib.pop_back();
-				--j;
-			}
-		}
-	}
+void PageLibPreprocessor::cutRedundantPages() {
+  for (size_t i = 0; i != _pageLib.size() - 1; ++i) {  //从_PageLib向量第一个开始查找重复文章
+    for(size_t j = i + 1; j != _pageLib.size(); ++j) {
+      if (_pageLib[i] == _pageLib[j]) {  //这里的 == 是在WebPage中判断两个top向量是否相等的==重载
+        //删除重复元素可以逐一向前移位但时间成本很大，由于这里不必保持元素顺序 所以采用用末尾元素替换被删除元素然后pop_back()删除末尾元素的方式
+	_pageLib[j] = _pageLib[_pageLib.size() - 1];  
+	_pageLib.pop_back();
+	--j;  //末位元素被删所以循环条件变化，.size()-1了但改不了size所以改j来改变条件
+      }
+    }
+  }
 }
 
 void PageLibPreprocessor::buildInvertIndexTable()
