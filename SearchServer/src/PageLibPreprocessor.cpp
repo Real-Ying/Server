@@ -96,7 +96,7 @@ void PageLibPreprocessor::buildInvertIndexTable() {
 	
   //计算每篇文档中的词的权重,并归一化
   map<int, double> weightSum;// 归一化步骤分母所需 map<docid, freq> 保存一篇文档中所有词的权重平方和. w1^2+w2^2+……+wn^2
-  //tf-idf算法
+  //tf-idf算法 迭代器都用& 最终结果就是改变后的_PageLib
   int totalPageNum = _pageLib.size();       //N
   for (auto & item : _invertIndexTable) {   	
     int df = item.second.size();            //df vector的长度就是这个词在所有文章中出现的次数,item.second即vector
@@ -132,15 +132,15 @@ void PageLibPreprocessor::buildInvertIndexTable() {
 
 
 void PageLibPreprocessor::storeOnDisk() {
-  sort(_pageLib.begin(), _pageLib.end());	
-
-  ofstream ofsPageLib(_conf.getConfigMap()[NEWPAGELIB_KEY].c_str());
+  sort(_pageLib.begin(), _pageLib.end());  //新网络库排序一下
+  
+  //存新网页库和新网页位置偏移库
+  ofstream ofsPageLib(_conf.getConfigMap()[NEWPAGELIB_KEY].c_str());  //以配置中新网页库和新位置偏移库的Key对应值(路径)为参数创建两个文件输出流
   ofstream ofsOffsetLib(_conf.getConfigMap()[NEWOFFSETLIB_KEY].c_str());
-
   if (!ofsPageLib.good() || !ofsOffsetLib.good()) {	
     cout << "new page or offset lib ofstream open error!" << endl;
   }
-
+  
   for (auto & page : _pageLib) {
     int id = page.getDocId();
     int length = page.getDoc().size();
@@ -153,7 +153,7 @@ void PageLibPreprocessor::storeOnDisk() {
   ofsPageLib.close();
   ofsOffsetLib.close();
 
-  // invertIndexTable
+  //存倒排索引表
   ofstream ofsInvertIndexTable(_conf.getConfigMap()[INVERTINDEX_KEY].c_str());
   if (!ofsInvertIndexTable.good()) {
     cout << "invert index table ofstream open error!" << endl;
@@ -163,7 +163,7 @@ void PageLibPreprocessor::storeOnDisk() {
     for (auto sitem : item.second) {
       ofsInvertIndexTable << sitem.first << "\t" << sitem.second <<  "\t";
     }
-    ofsInvertIndexTable << endl;
+    ofsInvertIndexTable << endl;  // <<endl 换行并立即刷新缓冲区 相当于/n + <<flush
   }
   ofsInvertIndexTable.close();
 }
