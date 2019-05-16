@@ -51,7 +51,7 @@ void PageLibPreprocessor::readInfoFromFile() {
     stringstream ss(line);
     ss >> docId >> docOffset >> docLen;
     
-    //根据偏移量    
+    //根据偏移量从每篇正向索引里提取出内容，用来构造webpage对象形成新的网页库    
     string doc;
     doc.resize(docLen, ' ');  //string::resize()调整字符串大小，预留该文章大小空间
     pageIfs.seekg(docOffset, pageIfs.beg);  //seek(off, dir) off相对偏移量，dir偏移的起始位置，这里是
@@ -85,39 +85,41 @@ void PageLibPreprocessor::cutRedundantPages() {
 }
 
 void PageLibPreprocessor::buildInvertIndexTable() {
-  for (auto page : _pageLib) {
-    map<string, int>& wordsMap = page.getWordsMap();
+  //遍历重构后的网络库,以获取词频map的vector，以此重构词频map
+  //map<string, int(freq)> wordFreq ——> unordered_map<string, vector<std::pair<int(docid), double(freq)>>> wordFreq
+  for (auto page : _pageLib) {  
+    map<string, int>& wordsMap = page.getWordsMap();  
     for (auto wordFreq : wordsMap) {
-      _invertIndexTable[wordFreq.first].push_back(std::make_pair(page.getDocId(), wordFreq.second));
+      _invertIndexTable[wordFreq.first].push_back(std::make_pair(page.getDocId(), wordFreq.second));  
     }
   }
 	
   //计算每篇文档中的词的权重,并归一化
-  map<int, double> weightSum;// 保存每一篇文档中所有词的权重平方和. int 代表docid
-
-  int totalPageNum = _pageLib.size();
-  for (auto & item : _invertIndexTable) {	
-    int df = item.second.size();
+  map<int, double> weightSum;// 归一化步骤分母所需 map<docid, freq> 保存一篇文档中所有词的权重平方和. w1^2+w2^2+……+wn^2
+  //tf-idf算法
+  int totalPageNum = _pageLib.size();       //N
+  for (auto & item : _invertIndexTable) {   	
+    int df = item.second.size();            //df vector的长度就是这个词在所有文章中出现的次数,item.second即vector
     //求关键词item.first的逆文档频率
-    double idf = log(static_cast<double>(totalPageNum)/ df + 0.05) / log(2);
+    double idf = log(static_cast<double>(totalPageNum)/ df + 0.05) / log(2);  //idf
 		
-    for (auto & sitem : item.second) {
-      double weight = sitem.second * idf;
+    for (auto & sitem : item.second) {  //item.second=vector
+      double weight = sitem.second * idf;   //w=tf*idf tf=freq=sitem.second
 
-      weightSum[sitem.first] += pow(weight, 2);
-      sitem.second = weight;
+      weightSum[sitem.first] += pow(weight, 2); //同时填充weightSum容器
+      sitem.second = weight;                    //w替换掉重构的词频map元素freq以得到 
     }
   }
 
   for (auto & item : _invertIndexTable) {	
   //归一化处理
-    for (auto & sitem : item.second) {
-      sitem.second = sitem.second / sqrt(weightSum[sitem.first]);
+    for (auto & sitem : item.second) {  //item.second.second 即weight
+      sitem.second = sitem.second / sqrt(weightSum[sitem.first]);  //将w项进行归一化计算得到weight，从而最终得到 倒排索引表
     }
   }
 
 
-#if 0 // for debug
+#if 0 // for debug 打印_invertIndexTable的内容
   for (auto item : _invertIndexTable) {
     cout << item.first << "\t";
     for (auto sitem : item.second) {
@@ -128,48 +130,42 @@ void PageLibPreprocessor::buildInvertIndexTable() {
 #endif
 }
 
-void PageLibPreprocessor::storeOnDisk()
-{
-	sort(_pageLib.begin(), _pageLib.end());	
 
-	ofstream ofsPageLib(_conf.getConfigMap()[NEWPAGELIB_KEY].c_str());
-	ofstream ofsOffsetLib(_conf.getConfigMap()[NEWOFFSETLIB_KEY].c_str());
+void PageLibPreprocessor::storeOnDisk() {
+  sort(_pageLib.begin(), _pageLib.end());	
 
-	if( !ofsPageLib.good() || !ofsOffsetLib.good())
-	{	
-		cout << "new page or offset lib ofstream open error!" << endl;
-	}
+  ofstream ofsPageLib(_conf.getConfigMap()[NEWPAGELIB_KEY].c_str());
+  ofstream ofsOffsetLib(_conf.getConfigMap()[NEWOFFSETLIB_KEY].c_str());
 
-	for(auto & page : _pageLib)
-	{
-		int id = page.getDocId();
-		int length = page.getDoc().size();
-		ofstream::pos_type offset = ofsPageLib.tellp();
-		ofsPageLib << page.getDoc();
+  if (!ofsPageLib.good() || !ofsOffsetLib.good()) {	
+    cout << "new page or offset lib ofstream open error!" << endl;
+  }
 
-		ofsOffsetLib << id << '\t' << offset << '\t' << length << '\n';
-	}
+  for (auto & page : _pageLib) {
+    int id = page.getDocId();
+    int length = page.getDoc().size();
+    ofstream::pos_type offset = ofsPageLib.tellp();
+    ofsPageLib << page.getDoc();
 
-	ofsPageLib.close();
-	ofsOffsetLib.close();
+    ofsOffsetLib << id << '\t' << offset << '\t' << length << '\n';
+  }
 
+  ofsPageLib.close();
+  ofsOffsetLib.close();
 
-	// invertIndexTable
-	ofstream ofsInvertIndexTable(_conf.getConfigMap()[INVERTINDEX_KEY].c_str());
-	if(!ofsInvertIndexTable.good())
-	{
-		cout << "invert index table ofstream open error!" << endl;
-	}
-	for(auto item : _invertIndexTable)
-	{
-		ofsInvertIndexTable << item.first << "\t";
-		for(auto sitem : item.second)
-		{
-			ofsInvertIndexTable << sitem.first << "\t" << sitem.second <<  "\t";
-		}
-		ofsInvertIndexTable << endl;
-	}
-	ofsInvertIndexTable.close();
+  // invertIndexTable
+  ofstream ofsInvertIndexTable(_conf.getConfigMap()[INVERTINDEX_KEY].c_str());
+  if (!ofsInvertIndexTable.good()) {
+    cout << "invert index table ofstream open error!" << endl;
+  }
+  for (auto item : _invertIndexTable) {
+    ofsInvertIndexTable << item.first << "\t";
+    for (auto sitem : item.second) {
+      ofsInvertIndexTable << sitem.first << "\t" << sitem.second <<  "\t";
+    }
+    ofsInvertIndexTable << endl;
+  }
+  ofsInvertIndexTable.close();
 }
 
 }// end of namespace wd
