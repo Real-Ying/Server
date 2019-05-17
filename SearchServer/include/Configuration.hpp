@@ -5,25 +5,22 @@
 #include <map>
 #include <string>
 
-namespace wd
-{
+namespace wd {
 
-class Configuration
-{
-public:
-	Configuration(const std::string & filepath);
+class Configuration {
+ public:
+  Configuration(const std::string & filepath);          //构造函数
 
-	std::map<std::string, std::string> & getConfigMap();
-	std::set<std::string> & getStopWordList();
-	void debug();
-private:
-
-	void readConfiguration();
-
-private:
-	std::string filepath_;
-	std::map<std::string, std::string> configMap_;
-	std::set<std::string> stopWordList_;
+  std::map<std::string, std::string> & getConfigMap();  //获取存放配置文件内容的map
+  std::set<std::string> & getStopWordList();            //获取停用词词集 
+  void debug();
+ 
+ private:
+  void readConfiguration();                       //构造函数体运行的功能，将配置文件内容以map容器形式存储
+ private:
+  std::string filepath_;                          //配置文件路径
+  std::map<std::string, std::string> configMap_;  //配置文件内容
+  std::set<std::string> stopWordList_;            //停用词词集
 };
 
 }//end of namespace wd
