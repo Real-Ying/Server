@@ -55,7 +55,7 @@ void Dictionary::read(const string& filename) {
   std::sort(_dict.begin(), _dict.end());  //完成后根据频率大小对索引vextor进行快排
 }
 
-void Dictionary::store(const string& word) {
+void Dictionary::store(const string& filename) {
   ofstream ofs(filename);  //创建一个文件输出流
   if (!ofs) {
       cout << " >> ofstream open error!" << endl;
