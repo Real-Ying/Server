@@ -216,20 +216,21 @@ vector<double> WordQuery::getQueryWordsWeightVector(vector<string> & queryWords)
 }
 
 //执行查询
-bool WordQuery::executeQuery(const vector<string> & queryWords, 
+bool WordQuery::executeQuery(const vector<string> & queryWords,      //传入一个查询输入和一个结果输出
 		             vector<pair<int, vector<double> > > & resultVec) {
   cout << "executeQuery()" << endl;
-  if (queryWords.size() == 0) {        //若查询串为空
+  if (queryWords.size() == 0) {         //空串
     cout <<"empty string not find" << endl;
     return false;
-  }	
-  //保存求交集的迭代器 保存格式：< iterator-><docid,weight>, times >
+  }
+  /***********得到最小进度条的长度 和 各个进度条(带遍历起始位置和迭代次数)********************/  
+  //保存求交集的迭代器 指向的对象格式：< iterator-><docid,weight>, iter_times >
   typedef set<pair<int, double> >::iterator setIter;	//pair<docid, weight>
   vector<pair<setIter, int> > iterVec;
  
-  int minIterNum = 0x7FFFFFFF;        //求交集的最小迭代数的初始化(设为整数的大小上限是为了不断找到更小的长度)
+  int minIterNum = 0x7FFFFFFF;        //求交集的最小迭代数的初始化(设为整数的大小上限是为了不断找到更小的长度直到等于最短的进度条长度)
 
-  //遍历查询串中每个词，得到minIterNum(出现次数最少的那个关键词的出现数量) 和 统计每个词迭代次数的计数vector
+  //遍历查询串中每个词，得到minIterNum(出现次数最少的那个关键词的出现数量 即最短的进度条长度) 和 统计每个词迭代次数的计数vector
   //最小迭代次数 意为各集合中docid相同的元素集合(交集)的长度不会超过最短的那个集合的长度
   for (auto item : queryWords) {
     int sz = _invertIndexTable[item].size();  
@@ -238,32 +239,36 @@ bool WordQuery::executeQuery(const vector<string> & queryWords,
     if (minIterNum > sz)               //不断找到更小的size 
       minIterNum = sz;               
 
-    iterVec.push_back(make_pair(_invertIndexTable[item].begin(), 0));  //将 迭代器(指向每个关键词的权重set头部)和初始迭代次数 的pair存为一个vec
+    iterVec.push_back(make_pair(_invertIndexTable[item].begin(), 0));  //将 迭代器(指向每个关键词的权重set头部)与初始迭代次数 的pair存为一个vec
   }                                                                    //大小为关键词数量
   cout << "minIterNum = " << minIterNum << endl;
-  
-  //找到包含所有关键词的所有文章
+  /***************************************************************/
+
+
+  /******************找到包含所有关键词的所有文章*****************/
   bool isExiting = false;  //当isExiting=true说明所有符合条件的文章都已找出
  
   while (!isExiting) {
-    //遍历iterVec，逐层邻近两两判断每层所有关键词的docid是否全部相同 
+    //遍历iterVec，对进度条们逐层邻近两两判断每层所有关键词的docid是否相同(全部相同则记录或存在不同则break处理) 
     int idx = 0;
     for (; idx != iterVec.size() - 1; ++idx) {  
       if ((iterVec[idx].first)->first != iterVec[idx+1].first->first)  
         break;
-    }		
-    if (idx == iterVec.size() - 1) {	// 若此层全部相同(都是同一篇文章中)
-      vector<double> weightVec;
-      int docid = iterVec[0].first->first;  //得到这篇文章编号
+    }
+
+    if (idx == iterVec.size() - 1) {	// 若此竖层docid全部相同(都是同一篇文章中)
+      vector<double> weightVec;             //记录此竖层的同一个docid和所有weight
+      int docid = iterVec[0].first->first;  //
+      //
       for (idx = 0; idx != iterVec.size(); ++idx) {
-        weightVec.push_back(iterVec[idx].first->second);  //将这层所有权重放进一个vec(没必要的一步)
+        weightVec.push_back(iterVec[idx].first->second);  
         ++(iterVec[idx].first);                            //每一个迭代器(setIter)++(开始判断下一层)
         ++(iterVec[idx].second);                           //同时记录迭代器++的次数
         if (iterVec[idx].second == minIterNum) {	//若判断迭代次数已经到达最小迭代数(最短集合的长度)则查找完毕信号量置true 然后返回  
           isExiting = true;	
         } 
       }
-      resultVec.push_back(make_pair(docid, weightVec)); //元素相同的组成交集
+      resultVec.push_back(make_pair(docid, weightVec)); //元素相同的组成交集vector<pair<docid, vector<weight...>>, ...>
     }
     else {	                       //若此层有不同那就不合格，这层直接跳下层操作就行，多余动作
       int minDocId = 0x7FFFFFFF;
