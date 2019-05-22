@@ -31,9 +31,9 @@ class WordQuery {
  private:
   void loadLibrary();                     //加载两个个数据库文件，经webpage生成新网页库(包含词频和top词集)和新位置偏移库
 
-  vector<double> getQueryWordsWeightVector(vector<string> & queryWords);    //计算查询词的权重值
+  vector<double> getQueryWordsWeightVector(vector<string> & queryWords);    //计算查询词的权重值weight
 	
-  bool executeQuery(const vector<string> & queryWords, vector<pair<int, vector<double> > > & resultVec);    //执行查询
+  bool executeQuery(const vector<string> & queryWords, vector<pair<int, vector<double> > > & resultVec);    //执行查询(结果保存resultVec)
 	
   string createJson(vector<int> & docIdVec, const vector<string> & queryWords);   //结果的Json封装函数
 
