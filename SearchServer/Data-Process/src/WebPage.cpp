@@ -17,17 +17,18 @@ namespace wd
 {
 
 //词语及其词频vector<pair<string, int>>的排序所需的重载，根据pair<>的第二个元素降序
-struct WordFreqCompare
-{
-	bool operator()(const pair<string, int> & left, const pair<string, int> & right)
-	{
-		if(left.second < right.second)
-		{	return true;	}
-		else if(left.second == right.second && left.first > right.first)
-		{	return true;	}
-		else
-		{	return false;	}
-	}
+struct WordFreqCompare {
+  bool operator()(const pair<string, int> & left, const pair<string, int> & right) {
+    if (left.second < right.second) {	
+      return true;	
+    }
+    else if (left.second == right.second && left.first > right.first) {
+      return true;	\
+    }
+    else {
+      return false;	
+    }
+  }
 };
 
 
@@ -140,19 +141,19 @@ bool operator == (const WebPage & lhs, const WebPage & rhs) {
   int totalNum = lhsNum < rhsNum ? lhsNum : rhsNum;
 
   if ( static_cast<double>(commNum) / totalNum > 0.75 ) {  //阈值0.75
-      return true;
+    return true;
   }
   else {
-      return false;
+    return false;
   }
 }
 
 //对文档按照docId进行排序(外部功能)
 bool operator < (const WebPage & lhs, const WebPage & rhs) {
   if (lhs._docId < rhs._docId)
-      return true;
+    return true;
   else 
-      return false;
+    return false;
 }
 
 }// end of namespace wd
