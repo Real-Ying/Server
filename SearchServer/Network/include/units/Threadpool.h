@@ -7,7 +7,7 @@
 
 namespace wd {
 
-class Thread;
+class Thread;  //Threadpool的基类 前置申明
 
 class Threadpool {
  public:
@@ -18,17 +18,17 @@ class Threadpool {
   void start();
   void stop();
 
-  void addTask(Task task);
+  void addTask(Task task);                         //添加任务 外部生产者向任务队列添加任务的外部接口
 
  private:
-  void threadFunc();
-  Task getTask();
+  void threadFunc();                 //调用任务执行步骤的包裹函数
+  Task getTask();                    //提取任务 内部消费者从任务队列提取任务的内部接口
 
  private:
-  size_t threadsNum_;
+  size_t threadsNum_;                   //线程池及其大小
   std::vector<Thread *> vecThreads_;
-  Buffer buf_;
-  bool isExit_;
+  Buffer buf_;                          //任务队列
+  bool isExit_;                         //线程池退出信号
 };
 
 }// end of namespace wd
