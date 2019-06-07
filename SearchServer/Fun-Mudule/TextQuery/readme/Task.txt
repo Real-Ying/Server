@@ -55,3 +55,21 @@
     			   return 0;
     			}     			   			    			
   
+TextQuery  对文章进行预处理并查询单词 统统交给QueryResult打印
+		
+		所有的查询都看成一个整体  -->  Query类对象
+				
+				"hello" & "world"
+				
+				"guangdong" | "shenzen" 
+				
+				~ "wangdao"
+				
+		自己看代码的过程是一个自底向上的过程 ==> 把书读厚
+				
+		讲解代码的过程是一个自顶向下的过程	 ==> 把书读薄
+			
+		TextQuery功能是生成两个容器所以是容器类，容器类都要被做成单例类
+	    Query仅是一个接口层  对外提供接口 （查询结果函数eval()和查询类型函数rep() ) 实现交给share_ptr指向的实现层Query_Base （两者组合关系）
+        Query_Base中的函数是虚函数，具体的功能由它的派生类来完成 (普通查询 非查询 二元查询包括的与查询 和 非查询) 
+        普通查询WordQuery依赖TextQuery的数据库，而TextQuery依赖QueryResult的打印功能

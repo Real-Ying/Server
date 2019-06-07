@@ -242,15 +242,16 @@ bool WordQuery::executeQuery(const vector<string> & queryWords,      //传入一
     iterVec.push_back(make_pair(_invertIndexTable[item].begin(), 0));  //将 迭代器(指向每个关键词的权重set头部)与初始迭代次数 的pair存为一个vec
   }                                                                    //大小为关键词数量
   cout << "minIterNum = " << minIterNum << endl;
-  /***************************************************************/
+  /*********************************************************************************************/
 
+ 
+  /**********************************找到包含所有关键词的所有文章**********************************/
 
-  /******************找到包含所有关键词的所有文章*****************/
   bool isExiting = false;  //当isExiting=true说明所有符合条件的文章都已找出
  
   while (!isExiting) {
     //遍历iterVec，对进度条们逐层邻近两两判断每层所有关键词的docid是否相同(全部相同则记录或存在不同则break处理) 
-    int idx = 0;
+    int idx = 0;    //每次找到一组后又从各进度条第一位开始找并计数，直到计数满(达到最小进度条长度)为止
     for (; idx != iterVec.size() - 1; ++idx) {  
       if ((iterVec[idx].first)->first != iterVec[idx+1].first->first)  
         break;
@@ -263,12 +264,12 @@ bool WordQuery::executeQuery(const vector<string> & queryWords,      //传入一
       for (idx = 0; idx != iterVec.size(); ++idx) {
         weightVec.push_back(iterVec[idx].first->second);  
         ++(iterVec[idx].first);                            //每一个迭代器(setIter)++(开始判断下一层)
-        ++(iterVec[idx].second);                           //同时记录迭代器++的次数
+        ++(iterVec[idx].second);                           //找到一篇符合条件得文章，计数器++
         if (iterVec[idx].second == minIterNum) {	//若判断迭代次数已经到达最小迭代数(最短集合的长度)则查找完毕信号量置true 然后返回  
           isExiting = true;	
         } 
       }
-      resultVec.push_back(make_pair(docid, weightVec)); //元素相同的组成交集vector<pair<docid, vector<weight...>>, ...>
+      resultVec.push_back(make_pair(docid, weightVec)); //交集vector <pair<docid, vector<weight...>>, ...>
     }
     else {	                       //若此层有不同那就不合格，这层直接跳下层操作就行，多余动作
       int minDocId = 0x7FFFFFFF;
@@ -280,7 +281,7 @@ bool WordQuery::executeQuery(const vector<string> & queryWords,      //传入一
         }
       }
     
-      ++(iterVec[iterIdx].first);                      //迭代器跳到下层
+      ++(iterVec[iterIdx].first);                      //迭代器跳到下层，迭代器不计数
       ++(iterVec[iterIdx].second);
       if (iterVec[iterIdx].second == minIterNum) {
         isExiting = true;	
