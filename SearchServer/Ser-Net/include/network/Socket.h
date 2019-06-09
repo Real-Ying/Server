@@ -1,6 +1,6 @@
 #ifndef __WD_SOCKET_H
 #define __WD_SOCKET_H
-
+//class Socket & class Accept
 #include "Noncopyable.h"
 
 //每当有文件描述符生成都交给socket类来控制开启关闭并可获得两端网络地址
