@@ -1,9 +1,3 @@
- ///
- /// @file    TcpConnection.h
- /// @author  lemon(haohb13@gmail.com)
- /// @date    2015-11-05 16:59:04
- ///
-
 #ifndef _WD_TCPCONNCETION_H
 #define _WD_TCPCONNCETION_H
 
@@ -16,49 +10,47 @@
 #include <memory>
 #include <functional>
 
-namespace wd
-{
+namespace wd {
 
 class EpollPoller;
-
 class TcpConnection;
+
 typedef std::shared_ptr<TcpConnection> TcpConnectionPtr;
 
 class TcpConnection : Noncopyable,
-	public std::enable_shared_from_this<TcpConnection>
-{
-public:
-	typedef std::function<void(const TcpConnectionPtr &)> TcpConnectionCallback;
-	TcpConnection(int sockfd, EpollPoller * loop);
-	~TcpConnection();
+	public std::enable_shared_from_this<TcpConnection> {
+ public:
+  typedef std::function<void(const TcpConnectionPtr &)> TcpConnectionCallback;
+  TcpConnection(int sockfd, EpollPoller * loop);
+  ~TcpConnection();
 
-	std::string receive();
-	void send(const std::string & msg);
-	void sendAndClose(const std::string & msg);
-	void sendInLoop(const std::string & msg);
-	void shutdown();
+  std::string receive();
+  void send(const std::string & msg);
+  void sendAndClose(const std::string & msg);
+  void sendInLoop(const std::string & msg);
+  void shutdown();
 
-	std::string toString();
+  std::string toString();
 
-	void setConnectionCallback(TcpConnectionCallback cb);
-	void setMessageCallback(TcpConnectionCallback cb);
+  void setConnectionCallback(TcpConnectionCallback cb);
+  void setMessageCallback(TcpConnectionCallback cb);
 	void setCloseCallback(TcpConnectionCallback cb);
 
-	void handleConnectionCallback();
-	void handleMessageCallback();
-	void handleCloseCallback();
+  void handleConnectionCallback();
+  void handleMessageCallback();
+  void handleCloseCallback();
 
-private:
-	Socket sockfd_;
-	SocketIO sockIO_;
-	const InetAddress localAddr_;
-	const InetAddress peerAddr_;
-	bool isShutdownWrite_;
+ private:
+  Socket sockfd_;
+  SocketIO sockIO_;
+  const InetAddress localAddr_;
+  const InetAddress peerAddr_;
+  bool isShutdownWrite_;
 	EpollPoller * loop_;
 
-	TcpConnectionCallback onConnectionCb_;
-	TcpConnectionCallback onMessageCb_;
-	TcpConnectionCallback onCloseCb_;
+  TcpConnectionCallback onConnectionCb_;
+  TcpConnectionCallback onMessageCb_;
+  TcpConnectionCallback onCloseCb_;
 
 };
 
