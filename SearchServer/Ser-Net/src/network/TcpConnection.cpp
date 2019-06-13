@@ -3,40 +3,38 @@
 #include <string.h>
 #include <stdio.h>
 
+namespace wd {
 
-namespace wd
-{
-
-TcpConnection::TcpConnection(int sockfd, EpollPoller * loop)
+TcpConnection::TcpConnection(int sockfd, EpollPoller * loop)   //构造
     : sockfd_(sockfd), 
       sockIO_(sockfd), 
-      localAddr_(wd::Socket::getLocalAddr(sockfd)),
-      peerAddr_(wd::Socket::getPeerAddr(sockfd)),
+      localAddr_(wd::Socket::getLocalAddr(sockfd)),  //头文件中包含了Socket.h，利用其成员函数 传入socket文件描述符 获取本端和对端的socket口
+      peerAddr_(wd::Socket::getPeerAddr(sockfd)),    
       isShutdownWrite_(false), 
       loop_(loop) {
       
 }
 
 
-TcpConnection::~TcpConnection() {
-  if (!isShutdownWrite_) {
+TcpConnection::~TcpConnection() {                             //析构
+  if (!isShutdownWrite_) {                          //查看本端写状态，若未关闭则关闭	  
     isShutdownWrite_ = true;
     shutdown();
   }
   printf("~TcpConnection()\n");
 }
 
-std::string TcpConnection::receive() {
+std::string TcpConnection::receive() {     //Tcp连接的接收函數，从内核接收缓冲区读一行内容到用户应用空间的buf
   char buf[1024];
-  memset(buf, 0, sizeof(buf));
-  size_t ret = sockIO_.readline(buf, sizeof(buf));
+  memset(buf, 0, sizeof(buf));  //运用memset()内存中初始化开辟1kb数组空间            
+  size_t ret = sockIO_.readline(buf, sizeof(buf));  
   if (ret == 0) {
     return std::string();
   } else
     return std::string(buf);
 }
 
-void TcpConnection::send(const std::string & msg) {
+void TcpConnection::send(const std::string & msg) {    //Tcp连接的发送函数 从用户应用空间发送数据到内核发送缓冲区
   sockIO_.writen(msg.c_str(), msg.size());
 }
 
@@ -46,11 +44,13 @@ void TcpConnection::sendAndClose(const std::string & msg) {
   shutdown();
 }
 
+
 void TcpConnection::sendInLoop(const std::string & msg) {
   loop_->runInLoop(std::bind(&TcpConnection::sendAndClose, this, msg));
 }
 
-void TcpConnection::shutdown() {
+//Tcp连接的关闭
+void TcpConnection::shutdown() {   
   if (!isShutdownWrite_)
     sockfd_.shutdownWrite();
   isShutdownWrite_ = true;
