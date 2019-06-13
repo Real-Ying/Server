@@ -24,29 +24,29 @@ class TcpConnection : Noncopyable,
   TcpConnection(int sockfd, EpollPoller * loop);
   ~TcpConnection();
 
-  std::string receive();
-  void send(const std::string & msg);
+  std::string receive();                        //接收 封装了Socket::readline() 
+  void send(const std::string & msg);           //发送 封装了Socket::readline()
   void sendAndClose(const std::string & msg);
   void sendInLoop(const std::string & msg);
-  void shutdown();
+  void shutdown();                              //关闭连接(写功能) 封装了Socket::shutdownwrite()
 
   std::string toString();
 
   void setConnectionCallback(TcpConnectionCallback cb);
   void setMessageCallback(TcpConnectionCallback cb);
-	void setCloseCallback(TcpConnectionCallback cb);
+  void setCloseCallback(TcpConnectionCallback cb);
 
   void handleConnectionCallback();
   void handleMessageCallback();
   void handleCloseCallback();
 
  private:
-  Socket sockfd_;
-  SocketIO sockIO_;
-  const InetAddress localAddr_;
-  const InetAddress peerAddr_;
-  bool isShutdownWrite_;
-	EpollPoller * loop_;
+  Socket sockfd_;                 //socket文件描述符
+  SocketIO sockIO_;               //SocketIO类对象 包含了TcpConection读写的实现
+  const InetAddress localAddr_;   //本端socket口地址
+  const InetAddress peerAddr_;    //对端socket口地址
+  bool isShutdownWrite_;          //本端写状态变量
+  EpollPoller * loop_;
 
   TcpConnectionCallback onConnectionCb_;
   TcpConnectionCallback onMessageCb_;
