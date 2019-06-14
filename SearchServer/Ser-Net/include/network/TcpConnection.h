@@ -26,13 +26,13 @@ class TcpConnection : Noncopyable,
 
   std::string receive();                        //接收 封装了Socket::readline() 
   void send(const std::string & msg);           //发送 封装了Socket::readline()
-  void sendAndClose(const std::string & msg);
+  void sendAndClose(const std::string & msg);   //针对php的发送
   void sendInLoop(const std::string & msg);
   void shutdown();                              //关闭连接(写功能) 封装了Socket::shutdownwrite()
 
-  std::string toString();
+  std::string toString();                       //将socket口string格式形式打印
 
-  void setConnectionCallback(TcpConnectionCallback cb);
+  void setConnectionCallback(TcpConnectionCallback cb);  
   void setMessageCallback(TcpConnectionCallback cb);
   void setCloseCallback(TcpConnectionCallback cb);
 

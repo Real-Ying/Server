@@ -56,10 +56,11 @@ void TcpConnection::shutdown() {
   isShutdownWrite_ = true;
 }
 
+//string形式打印socket口
 std::string TcpConnection::toString() {
   char str[100];
   snprintf(str, sizeof(str), "%s:%d -> %s:%d",
-	   localAddr_.ip().c_str(),
+	   localAddr_.ip().c_str()
 	   localAddr_.port(),
 	   peerAddr_.ip().c_str(),
 	   peerAddr_.port());
