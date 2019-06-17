@@ -12,22 +12,22 @@
 
 namespace wd {
 
-class EpollPoller;   
-class TcpConnection;
+class EpollPoller;         //关联关系 
+class TcpConnection;       
 
-typedef std::shared_ptr<TcpConnection> TcpConnectionPtr;                        //标签  
+typedef std::shared_ptr<TcpConnection> TcpConnectionPtr;                        //指针标签  
+typedef std::function<void(const TcpConnectionPtr &)> TcpConnectionCallback;    //函数标签 回调(作为参数传入回调执行函数)
 
-class TcpConnection : Noncopyable,                                              
-	              public std::enable_shared_from_this<TcpConnection> {      //执行回调所用辅助类
+class TcpConnection : Noncopyable,                                              //基类
+	              public std::enable_shared_from_this<TcpConnection> {      //执行回调时所用辅助类
  public:
-  typedef std::function<void(const TcpConnectionPtr &)> TcpConnectionCallback;  //本类中回调的类型(作为执行回调函数的参数)
-  TcpConnection(int sockfd, EpollPoller * loop);   //构造 传入socket文符 和 EpollPoller类的指针(使之关联关系)
+  TcpConnection(int sockfd, EpollPoller * loop);   //构造 传入socket文符 和 指向轮寻器类的指针(使之关联关系)
   ~TcpConnection();                                //析构
 
   std::string receive();                        //接收 封装了Socket::readline() 
   void send(const std::string & msg);           //发送 封装了Socket::readline()
   void sendAndClose(const std::string & msg);   //针对php的发送
-  void sendInLoop(const std::string & msg);     //循环发送
+  void sendInLoop(const std::string & msg);     //
   void shutdown();                              //关闭连接(写功能) 封装了Socket::shutdownwrite()
 
   std::string toString();                       //将socket口string格式形式打印
@@ -43,12 +43,12 @@ class TcpConnection : Noncopyable,
   void handleCloseCallback();
 
  private:
-  Socket sockfd_;                 //socket对象 
+  Socket sockfd_;                 //socket对象     
   SocketIO sockIO_;               //SocketIO类对象 包含了TcpConection读写的实现
   const InetAddress localAddr_;   //本端socket口地址
   const InetAddress peerAddr_;    //对端socket口地址
-  bool isShutdownWrite_;          //本端写状态变量
-  EpollPoller * loop_;            //EpollPoller指针对象   
+  bool isShutdownWrite_;          //本端写状态关闭信号
+  EpollPoller * loop_;            //指向轮寻器的指针   
   
   //三个回调在本类里的接收变量
   TcpConnectionCallback onConnectionCb_;
