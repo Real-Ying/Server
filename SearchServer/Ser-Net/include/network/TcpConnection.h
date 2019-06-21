@@ -15,11 +15,11 @@ namespace wd {
 class EpollPoller;         //关联关系 
 class TcpConnection;       
 
-typedef std::shared_ptr<TcpConnection> TcpConnectionPtr;                        //指针标签  
+typedef std::shared_ptr<TcpConnection> TcpConnectionPtr;                        //指针标签 具体连接 
 typedef std::function<void(const TcpConnectionPtr &)> TcpConnectionCallback;    //函数标签 回调(作为参数传入回调执行函数)
 
 class TcpConnection : Noncopyable,                                              //基类
-	              public std::enable_shared_from_this<TcpConnection> {      //执行回调时所用辅助类
+	              public std::enable_shared_from_this<TcpConnection> {      //调用智指执行回调时所用辅助类
  public:
   TcpConnection(int sockfd, EpollPoller * loop);   //构造 传入socket文符 和 指向轮寻器类的指针(使之关联关系)
   ~TcpConnection();                                //析构
@@ -27,7 +27,7 @@ class TcpConnection : Noncopyable,                                              
   std::string receive();                        //接收 封装了Socket::readline() 
   void send(const std::string & msg);           //发送 封装了Socket::readline()
   void sendAndClose(const std::string & msg);   //针对php的发送
-  void sendInLoop(const std::string & msg);     //
+  void sendInLoop(const std::string & msg);     //开启事件监听并执行回调的循环
   void shutdown();                              //关闭连接(写功能) 封装了Socket::shutdownwrite()
 
   std::string toString();                       //将socket口string格式形式打印
