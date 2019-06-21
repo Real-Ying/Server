@@ -11,7 +11,7 @@ TcpConnection::TcpConnection(int sockfd, EpollPoller * loop)   //构造
       localAddr_(wd::Socket::getLocalAddr(sockfd)),  //localAddr_赋值 Socket.h常成函
       peerAddr_(wd::Socket::getPeerAddr(sockfd)),    //peerAddr_赋值  Socket.h常成函
       isShutdownWrite_(false),                       //本端写状态信号初始化
-      loop_(loop) {                                  //轮询器 将轮询器对象给指针
+      loop_(loop) {                                  //EpollPoller类指针赋值
       
 }
 
@@ -44,7 +44,7 @@ void TcpConnection::sendAndClose(const std::string & msg) {
   shutdown();
 }
 
-
+//执行EpollPoller中的runInLoop()开始监听事件并按类执行回调
 void TcpConnection::sendInLoop(const std::string & msg) {
   loop_->runInLoop(std::bind(&TcpConnection::sendAndClose, this, msg));
 }
